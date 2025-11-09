@@ -99,8 +99,8 @@ CONFIG = {
         'https://hhhhh.eu.org/vps789.txt', # VPS789（备用）
         'https://www.wetest.vip/page/cloudflare/address_v4.html', # 微测网
         'https://www.wetest.vip/page/cloudflare/total_v4.html',   # 微测网 
-        'https://cf.090227.xyz/cmcc', # CMLiussss-电信
-        'https://cf.090227.xyz/ct', # CMLiussss-移动
+        'https://cf.090227.xyz/cmcc', # CMLiussss-移动
+        'https://cf.090227.xyz/ct', # CMLiussss-电信
     ],
 
     # 🔍 网络测试配置
@@ -120,7 +120,7 @@ CONFIG = {
     "advanced_mode": True,                  # 高级模式开关（True=开启，False=关闭）
     "bandwidth_test_count": 3,              # 带宽测试次数
     "bandwidth_test_size_mb": 10,             # 带宽测试文件大小（MB）
-    "latency_filter_percentage": 30,        # 延迟排名前百分比（取前30%的IP）
+    "latency_filter_percentage": 15,        # 延迟排名前百分比（取前15%的IP）
 }
 
 # ===== 国家/地区映射表 =====
