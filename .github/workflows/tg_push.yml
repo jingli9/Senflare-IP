@@ -1,27 +1,24 @@
 name: Telegram Push Senflare IP
 
 on:
-  workflow_dispatch:     # ✅ 手动触发
+  workflow_dispatch:
   schedule:
-    - cron: "0 */8 * * *" # ✅ 每8小时自动执行（UTC时间，可改）
+    - cron: "0 */9 * * *"  # 每9小时执行一次
 
 jobs:
   push_to_tg:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 检出仓库
       - name: Checkout 仓库
         uses: actions/checkout@v4
 
-      # 2️⃣ 下载最新文件
-      - name: 下载 Senflare-Pro.txt
+      - name: 下载最新文件
         id: download
         run: |
           set -e
           curl -fL -o Senflare-Pro.txt https://raw.githubusercontent.com/yifangip/Senflare-IP/refs/heads/main/Senflare-Pro.txt
 
-      # 3️⃣ 比较文件哈希判断是否更新
       - name: 比较文件哈希
         id: compare
         run: |
@@ -34,25 +31,22 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      # 4️⃣ 生成文件名和统计信息（仅当文件变化时）
-      - name: 生成时间戳文件名 & 统计 IP
+      - name: 生成时间戳文件名和统计信息
         if: steps.compare.outputs.changed == 'true'
         id: info
         run: |
           set -e
-          # 使用北京时间 (UTC+8)
+          # 北京时间 UTC+8
           TIME_STR=$(date -d "+8 hour" '+%Y-%m-%d_%H-%M')
           READABLE_TIME=$(date -d "+8 hour" '+%Y-%m-%d %H:%M')
           NEW_NAME="${TIME_STR}_优选ip.txt"
           mv Senflare-Pro.txt "$NEW_NAME"
 
-          # 统计 IP 数量（按行数）
           IP_COUNT=$(wc -l < "$NEW_NAME" | tr -d ' ')
           echo "file_name=$NEW_NAME" >> $GITHUB_OUTPUT
           echo "ip_count=$IP_COUNT" >> $GITHUB_OUTPUT
           echo "time_text=$READABLE_TIME" >> $GITHUB_OUTPUT
 
-      # 5️⃣ 推送文件到 Telegram
       - name: 推送到 Telegram
         if: steps.compare.outputs.changed == 'true'
         env:
@@ -76,7 +70,6 @@ EOF
                -F caption="$CAPTION" \
                "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument?chat_id=${CHAT_ID}"
 
-      # 6️⃣ 保存新文件哈希
       - name: 保存文件哈希
         if: steps.compare.outputs.changed == 'true'
         run: |
@@ -87,9 +80,8 @@ EOF
           git commit -m "update last_version.txt (auto)" || true
           git push || true
 
-      # 7️⃣ 出错自动通知 Telegram
       - name: 发送错误提醒
-        if: ${{ failure() }}
+        if: ${{ always() && failure() }}
         env:
           BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           CHAT_ID: ${{ secrets.TG_CHAT_ID }}
